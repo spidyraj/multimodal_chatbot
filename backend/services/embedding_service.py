@@ -1,4 +1,3 @@
-from sentence_transformers import SentenceTransformer
 from typing import List
 import numpy as np
 from core.logger import logger
@@ -20,6 +19,13 @@ def get_embedding_model():
     # Check if we should use lightweight embeddings
     if os.getenv("USE_LIGHTWEIGHT_EMBEDDINGS", "true").lower() == "true":
         logger.info("Using lightweight embeddings (hash-based)")
+        return None
+    
+    # Try to import sentence-transformers only when needed
+    try:
+        from sentence_transformers import SentenceTransformer
+    except ImportError:
+        logger.warning("sentence-transformers not available, using lightweight embeddings")
         return None
     
     start_time = time.time()

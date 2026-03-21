@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Optional
 
 class YouTubeRequest(BaseModel):
     url: str
