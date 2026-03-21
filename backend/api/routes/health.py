@@ -2,6 +2,7 @@ from fastapi import APIRouter
 from sqlalchemy.orm import Session
 from core.database import get_db
 from core.logger import logger
+from services.embedding_service import get_model_info
 
 router = APIRouter(tags=["health"])
 
@@ -14,9 +15,13 @@ async def health_check(db: Session = Depends(get_db)):
         # Test database connection
         db.execute("SELECT 1")
         
+        # Get embedding model info
+        model_info = get_model_info()
+        
         return {
             "status": "healthy",
             "database": "connected",
+            "embedding_model": model_info,
             "timestamp": "2024-01-01T00:00:00Z"  # Will be updated dynamically
         }
     except Exception as e:
@@ -24,5 +29,6 @@ async def health_check(db: Session = Depends(get_db)):
         return {
             "status": "unhealthy",
             "database": "disconnected",
-            "error": str(e)
+            "error": str(e),
+            "embedding_model": get_model_info()
         }

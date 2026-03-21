@@ -1,0 +1,18 @@
+[build]
+builder = "nixpacks"
+
+[deploy]
+healthcheckPath = "/health"
+healthcheckTimeout = 100
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 10
+
+[deploy.healthcheck]
+path = "/health"
+timeout = 100
+
+[[deploy.services]]
+name = "api"
+
+[deploy.services.env]
+PYTHON_VERSION = "3.10"
