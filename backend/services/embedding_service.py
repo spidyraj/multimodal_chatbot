@@ -4,6 +4,7 @@ import numpy as np
 from core.logger import logger
 import os
 import time
+from services.lightweight_embeddings import embed_texts_lightweight, embed_single_text_lightweight
 
 # Initialize model (lightweight for Railway compatibility)
 model = None
@@ -15,6 +16,11 @@ def get_embedding_model():
     
     if model is not None:
         return model
+    
+    # Check if we should use lightweight embeddings
+    if os.getenv("USE_LIGHTWEIGHT_EMBEDDINGS", "true").lower() == "true":
+        logger.info("Using lightweight embeddings (hash-based)")
+        return None
     
     start_time = time.time()
     
@@ -41,13 +47,18 @@ def embed_texts(texts: List[str]) -> List[List[float]]:
     """
     Convert texts to embeddings with fallback
     """
+    # Use lightweight embeddings if enabled or model fails to load
+    if os.getenv("USE_LIGHTWEIGHT_EMBEDDINGS", "true").lower() == "true":
+        logger.info("Using lightweight hash embeddings")
+        return embed_texts_lightweight(texts)
+    
     try:
         model = get_embedding_model()
         
         if model is None:
             # Fallback: simple hash-based embeddings
             logger.warning("Using fallback hash-based embeddings")
-            return [simple_hash_embedding(text) for text in texts]
+            return embed_texts_lightweight(texts)
         
         # Process in batches to avoid memory issues
         batch_size = 8
@@ -67,18 +78,22 @@ def embed_texts(texts: List[str]) -> List[List[float]]:
     except Exception as e:
         logger.error(f"Embedding error: {str(e)}")
         # Return fallback embeddings
-        return [simple_hash_embedding(text) for text in texts]
+        return embed_texts_lightweight(texts)
 
 def embed_single_text(text: str) -> List[float]:
     """
     Convert single text to embedding
     """
+    # Use lightweight embeddings if enabled
+    if os.getenv("USE_LIGHTWEIGHT_EMBEDDINGS", "true").lower() == "true":
+        return embed_single_text_lightweight(text)
+    
     try:
         embeddings = embed_texts([text])
-        return embeddings[0] if embeddings else simple_hash_embedding(text)
+        return embeddings[0] if embeddings else embed_single_text_lightweight(text)
     except Exception as e:
         logger.error(f"Single text embedding error: {str(e)}")
-        return simple_hash_embedding(text)
+        return embed_single_text_lightweight(text)
 
 def simple_hash_embedding(text: str) -> List[float]:
     """
@@ -107,8 +122,12 @@ def simple_hash_embedding(text: str) -> List[float]:
 
 def get_model_info() -> dict:
     """Get information about the loaded model"""
+    use_lightweight = os.getenv("USE_LIGHTWEIGHT_EMBEDDINGS", "true").lower() == "true"
+    
     return {
         "model_loaded": model is not None,
         "load_time_seconds": model_load_time,
-        "model_type": "sentence-transformers" if model else "hash-fallback"
+        "model_type": "sentence-transformers" if model else "hash-fallback",
+        "use_lightweight": use_lightweight,
+        "railway_optimized": use_lightweight
     }
