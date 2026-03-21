@@ -2,14 +2,10 @@
 builder = "nixpacks"
 
 [deploy]
-healthcheckPath = "/"
+healthcheckPath = "/health"
 healthcheckTimeout = 30
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 5
-
-[deploy.healthcheck]
-path = "/"
-timeout = 30
 
 [[deploy.services]]
 name = "frontend"
