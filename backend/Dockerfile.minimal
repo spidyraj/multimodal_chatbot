@@ -11,14 +11,10 @@ RUN apk add --no-cache \
 # Copy minimal requirements
 COPY requirements-minimal.txt .
 
-# Install Python packages to /tmp first (will be cleaned up)
-RUN pip install --no-cache-dir --root=/tmp -r requirements-minimal.txt \
-    && find /tmp -name "*.pyc" -delete \
-    && find /tmp -type d -name "__pycache__" -delete
-
-# Move installed packages to final location
-RUN mv /tmp/usr/local/lib/python3.10/site-packages /usr/local/lib/python3.10/ \
-    && mv /tmp/usr/local/bin/* /usr/local/bin/ 2>/dev/null || true
+# Install Python packages directly to final location
+RUN pip install --no-cache-dir -r requirements-minimal.txt \
+    && find /usr/local/lib/python3.10 -name "*.pyc" -delete \
+    && find /usr/local/lib/python3.10 -type d -name "__pycache__" -delete
 
 # Copy application code
 COPY . .
