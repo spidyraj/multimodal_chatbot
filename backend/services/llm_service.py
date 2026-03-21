@@ -3,11 +3,20 @@ from typing import Optional
 from core.config import settings
 from core.logger import logger
 
-def ask_llm(prompt: str, max_tokens: int = 1000) -> str:
+# Model configurations for different use cases
+MODELS = {
+    "fast": "llama3-8b-8192",      # Fast, good for simple queries
+    "balanced": "llama3-70b-8192",  # Balanced performance
+    "smart": "mixtral-8x7b-32768",  # Most capable for complex tasks
+}
+
+def ask_llm(prompt: str, max_tokens: int = 1000, model_type: str = "balanced") -> str:
     """
     Send a prompt to Groq API and get response
     """
     try:
+        model = MODELS.get(model_type, MODELS["balanced"])
+        
         url = "https://api.groq.com/openai/v1/chat/completions"
         
         headers = {
@@ -16,7 +25,7 @@ def ask_llm(prompt: str, max_tokens: int = 1000) -> str:
         }
         
         data = {
-            "model": "llama3-8b-8192",
+            "model": model,
             "messages": [{"role": "user", "content": prompt}],
             "max_tokens": max_tokens,
             "temperature": 0.7
@@ -40,3 +49,11 @@ def ask_llm(prompt: str, max_tokens: int = 1000) -> str:
     except Exception as e:
         logger.error(f"Unexpected error in LLM service: {str(e)}")
         return "Something went wrong. Please try again."
+
+def ask_llm_fast(prompt: str, max_tokens: int = 500) -> str:
+    """Fast model for simple queries"""
+    return ask_llm(prompt, max_tokens, "fast")
+
+def ask_llm_smart(prompt: str, max_tokens: int = 2000) -> str:
+    """Smart model for complex tasks"""
+    return ask_llm(prompt, max_tokens, "smart")

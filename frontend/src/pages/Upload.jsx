@@ -97,9 +97,9 @@ const Upload = () => {
       </div>
 
       {/* Upload Area */}
-      <div className="card">
+      <div className="bg-white rounded-lg shadow-md p-6">
         <div
-          className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary-400 transition-colors"
+          className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors"
           onDragOver={handleDragOver}
           onDrop={handleDrop}
         >
@@ -116,7 +116,7 @@ const Upload = () => {
           <label htmlFor="file-upload" className="cursor-pointer">
             <CloudArrowUpIcon className="mx-auto h-12 w-12 text-gray-400" />
             <div className="mt-4">
-              <span className="btn-primary inline-flex items-center">
+              <span className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors inline-flex items-center">
                 {uploading ? <LoadingSpinner size="sm" /> : <CloudArrowUpIcon className="w-4 h-4 mr-2" />}
                 {uploading ? 'Processing...' : 'Choose PDF file'}
               </span>
@@ -151,7 +151,7 @@ const Upload = () => {
 
       {/* Documents List */}
       {documents.length > 0 && (
-        <div className="card">
+        <div className="bg-white rounded-lg shadow-md p-6">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Your Documents</h3>
           <div className="space-y-3">
             {documents.map((doc) => (
@@ -179,7 +179,7 @@ const Upload = () => {
       )}
 
       {/* Instructions */}
-      <div className="card bg-blue-50 border-blue-200">
+      <div className="bg-blue-50 rounded-lg shadow-md p-6 border-blue-200">
         <h3 className="text-sm font-medium text-blue-900 mb-2">How it works:</h3>
         <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
           <li>Upload a PDF document using the area above</li>

@@ -57,7 +57,7 @@ const YouTube = () => {
       </div>
 
       {/* URL Input */}
-      <div className="card">
+      <div className="bg-white rounded-lg shadow-md p-6">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="youtube-url" className="block text-sm font-medium text-gray-700 mb-2">
@@ -70,13 +70,13 @@ const YouTube = () => {
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 placeholder="https://www.youtube.com/watch?v=..."
-                className="flex-1 input-field"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent flex-1"
                 disabled={loading}
               />
               <button
                 type="submit"
                 disabled={loading || !url.trim()}
-                className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
               >
                 {loading ? <LoadingSpinner size="sm" /> : <PlayIcon className="w-4 h-4" />}
                 <span>Summarize</span>
@@ -97,7 +97,7 @@ const YouTube = () => {
 
       {/* Results */}
       {summary && (
-        <div className="card">
+        <div className="bg-white rounded-lg shadow-md p-6">
           <div className="mb-4">
             <h3 className="text-lg font-medium text-gray-900 mb-2 flex items-center">
               <CheckCircleIcon className="w-5 h-5 text-green-500 mr-2" />
@@ -109,7 +109,7 @@ const YouTube = () => {
                   href={videoInfo.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-primary-600 hover:text-primary-800 flex items-center"
+                  className="text-sm text-blue-600 hover:text-blue-800 flex items-center"
                 >
                   <LinkIcon className="w-4 h-4 mr-1" />
                   {videoInfo.url}
@@ -128,7 +128,7 @@ const YouTube = () => {
 
       {/* Video Preview */}
       {videoInfo && videoInfo.videoId && (
-        <div className="card">
+        <div className="bg-white rounded-lg shadow-md p-6">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Video Preview</h3>
           <div className="aspect-w-16 aspect-h-9">
             <iframe
@@ -144,7 +144,7 @@ const YouTube = () => {
       )}
 
       {/* Instructions */}
-      <div className="card bg-blue-50 border-blue-200">
+      <div className="bg-blue-50 rounded-lg shadow-md p-6 border-blue-200">
         <h3 className="text-sm font-medium text-blue-900 mb-2">How it works:</h3>
         <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
           <li>Paste a YouTube video URL in the input field above</li>

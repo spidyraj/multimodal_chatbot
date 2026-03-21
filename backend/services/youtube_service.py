@@ -1,7 +1,7 @@
 import re
 from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled, NoTranscriptFound
 from typing import Optional, Dict
-from services.llm_service import ask_llm
+from services.llm_service import ask_llm_smart
 from core.logger import logger
 
 def extract_video_id(url: str) -> Optional[str]:
@@ -74,7 +74,7 @@ def summarize_youtube_video(url: str) -> Dict[str, str]:
         Focus on the main points, key insights, and any actionable information.
         """
         
-        summary = ask_llm(prompt, max_tokens=1500)
+        summary = ask_llm_smart(prompt)
         
         return {
             "response": summary,
