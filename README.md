@@ -42,12 +42,69 @@ A high-performance, production-ready Multimodal AI system that combines Retrieva
 
 ## 🏗️ System Architecture
 
+### 🌐 High-Level Design
+The system follows a modern decoupled architecture with a focus on high-speed multimodal processing.
+
+```mermaid
+graph LR
+    subgraph "Client Layer"
+    A[React Frontend]
+    end
+
+    subgraph "API Gateway (FastAPI)"
+    B[Auth Router]
+    C[Chat Router]
+    D[Upload Router]
+    E[Audio Router]
+    end
+
+    subgraph "Intelligence Layer"
+    F[Groq LLM Engine]
+    G[RAG Retrieval Service]
+    H[OCR & Doc Processor]
+    I[TTS Audio Service]
+    end
+
+    subgraph "Storage Layer"
+    J[(PostgreSQL - Users/Chats)]
+    K[(Pinecone - Vector Data)]
+    end
+
+    subgraph "AI Infrastructure"
+    L[Groq Llama/Gemma]
+    M[Google Cloud TTS]
+    end
+
+    A <--> B
+    A <--> C
+    A <--> D
+    A <--> E
+
+    B --> J
+    C --> G
+    C --> F
+    D --> H
+    H --> G
+    G --> K
+    F --> L
+    E --> I
+    I --> M
+```
+
+---
+
 ### 📄 Document & Image Processing (RAG)
 The system uses a sophisticated RAG pipeline to allow the LLM to "read" your uploaded files.
 
+**The Pipeline Flow:**
+1.  **Ingestion**: Files are parsed via **PyPDF2** (PDFs) or **Tesseract OCR** (Images).
+2.  **Embedding**: Extracted text is chunked and converted into semantic vectors.
+3.  **Storage**: Vectors are stored in **Pinecone** for low-latency similarity search.
+4.  **Retrieval**: When a user asks a question, the system finds the most relevant document chunks and injects them into the LLM prompt.
+
 ```mermaid
 graph TD
-    subgraph "Ingestion Phase"
+    subgraph "Data Ingestion"
     A[User Uploads File] --> B{File Type?}
     B -- PDF --> C[PyPDF2 Extraction]
     B -- Image/OCR --> D[Tesseract OCR]
@@ -59,7 +116,7 @@ graph TD
     G --> H[(Pinecone Vector DB)]
     end
 
-    subgraph "Query Phase"
+    subgraph "Contextual Querying"
     I[User Message] --> J[Generate Query Embedding]
     J --> K[Vector Similarity Search]
     K --> L[Retrieve Top-K Context]
@@ -68,6 +125,8 @@ graph TD
     N --> O[Final AI Response]
     end
 ```
+
+---
 
 ### 🔊 Audio Architecture (TTS)
 Seamlessly convert text responses into high-quality audio streams.
@@ -82,6 +141,17 @@ graph TD
     F --> G[Frontend Audio Component]
     G --> H[User Playback]
 ```
+
+---
+
+### 🔐 Security Architecture
+The application implements a multi-layer security model:
+1.  **Transport Layer**: All communication is secured via HTTPS/TLS.
+2.  **Identity Layer**: JWT (JSON Web Tokens) with a 24-hour expiration for stateless authentication.
+3.  **Data Layer**: Bcrypt password hashing and parameterized SQL queries to prevent injections.
+4.  **Isolation**: Users can only retrieve context and history belonging to their specific `user_id`.
+
+---
 
 ---
 
