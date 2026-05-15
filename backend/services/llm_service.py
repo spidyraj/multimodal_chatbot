@@ -5,9 +5,9 @@ from core.logger import logger
 
 # Model configurations for different use cases
 MODELS = {
-    "fast": "llama3-8b-8192",      # Fast, good for simple queries
-    "balanced": "llama3-70b-8192",  # Balanced performance
-    "smart": "mixtral-8x7b-32768",  # Most capable for complex tasks
+    "fast": "gemma2-9b-it",      # Fast, good for simple queries
+    "balanced": "llama-3.1-8b-instant",  # Balanced performance
+    "smart": "llama3-groq-70b-8192-tool-use-preview",  # Most capable for complex tasks
 }
 
 def ask_llm(prompt: str, max_tokens: int = 1000, model_type: str = "balanced") -> str:
@@ -48,7 +48,7 @@ def ask_llm(prompt: str, max_tokens: int = 1000, model_type: str = "balanced") -
         return "I'm having connection issues. Please try again later."
     except Exception as e:
         logger.error(f"Unexpected error in LLM service: {str(e)}")
-        return "Something went wrong. Please try again."
+        return "An unexpected error occurred. Please try again."
 
 def ask_llm_fast(prompt: str, max_tokens: int = 500) -> str:
     """Fast model for simple queries"""

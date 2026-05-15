@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive Frontend Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test { margin: 10px 0; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .warning { background-color: #fff3cd; border-color: #ffeaa7; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; overflow-x: auto; border-radius: 3px; }
+        input { width: 400px; padding: 8px; margin: 5px; border: 1px solid #ccc; border-radius: 3px; }
+        .step { background: #e9ecef; padding: 10px; margin: 10px 0; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Comprehensive Frontend Diagnostic</h1>
+    
+    <div class="step">
+        <h3>Step 1: Test Authentication</h3>
+        <button onclick="testAuth()">Test Login & Get Token</button>
+        <div id="authResult"></div>
+    </div>
+    
+    <div class="step">
+        <h3>Step 2: Test Chat (Direct API Call)</h3>
+        <input type="text" id="messageInput" placeholder="Type your message here..." value="Hello, how are you today?" />
+        <button onclick="testChatDirect()">Test Chat Direct</button>
+        <div id="chatResult"></div>
+    </div>
+    
+    <div class="step">
+        <h3>Step 3: Test Frontend URL</h3>
+        <button onclick="testFrontendURL()">Check Main Frontend</button>
+        <div id="frontendResult"></div>
+    </div>
+    
+    <div class="step">
+        <h3>Step 4: Compare Results</h3>
+        <button onclick="runAllTests()">Run All Tests</button>
+        <div id="compareResult"></div>
+    </div>
+    
+    <div style="margin-top: 30px;">
+        <button onclick="clearAll()">Clear All Results</button>
+    </div>
+
+    <script>
+        const API_URL = 'https://multimodal-backend-production.up.railway.app';
+        const FRONTEND_URL = 'https://multimodal-frontend-production.up.railway.app';
+        let authToken = null;
+
+        function addResult(elementId, test, status, message, data = null) {
+            const element = document.getElementById(elementId);
+            const div = document.createElement('div');
+            div.className = `test ${status}`;
+            div.style.marginTop = '10px';
+            
+            let content = `<strong>${test}:</strong> ${status.toUpperCase()}<br>${message}`;
+            if (data) {
+                content += `<br><pre>${JSON.stringify(data, null, 2)}</pre>`;
+            }
+            
+            div.innerHTML = content;
+            element.appendChild(div);
+        }
+
+        async function testAuth() {
+            try {
+                addResult('authResult', 'Auth Test', 'warning', 'Testing login...');
+                
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'test2102226581@example.com',
+                        password: 'testpassword123'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    authToken = data.access_token;
+                    addResult('authResult', 'Auth Test', 'success', `Token received: ${data.access_token.substring(0, 30)}...`);
+                } else {
+                    addResult('authResult', 'Auth Test', 'error', `Login failed: ${data.detail}`);
+                }
+            } catch (error) {
+                addResult('authResult', 'Auth Test', 'error', `Auth failed: ${error.message}`);
+            }
+        }
+
+        async function testChatDirect() {
+            if (!authToken) {
+                addResult('chatResult', 'Chat Test', 'error', 'Please login first');
+                return;
+            }
+
+            const message = document.getElementById('messageInput').value;
+            
+            try {
+                addResult('chatResult', 'Chat Test', 'warning', 'Sending message...');
+                
+                // This is EXACTLY like the frontend React app does
+                const response = await fetch(`${API_URL}/chat/`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    addResult('chatResult', 'Chat Test', 'success', 
+                        `✅ Response received! Length: ${data.response.length} chars<br>
+                        <strong>Response Preview:</strong><br>${data.response.substring(0, 200)}...`, 
+                        data);
+                } else {
+                    addResult('chatResult', 'Chat Test', 'error', 
+                        `❌ Chat failed: ${data.detail || 'Unknown error'}`, 
+                        data);
+                }
+            } catch (error) {
+                addResult('chatResult', 'Chat Test', 'error', `Chat failed: ${error.message}`);
+            }
+        }
+
+        async function testFrontendURL() {
+            try {
+                addResult('frontendResult', 'Frontend Test', 'warning', 'Checking main frontend...');
+                
+                const response = await fetch(FRONTEND_URL);
+                const content = await response.text();
+                
+                // Check for indicators of the frontend version
+                const hasFixedAPI = content.includes('sendMessageWithFile');
+                const hasOldError = content.includes('Sorry, I encountered an error');
+                
+                let status = 'success';
+                let message = 'Frontend accessible';
+                
+                if (hasFixedAPI) {
+                    message += ' ✅ Has fixed API code';
+                } else {
+                    message += ' ⚠️ May have old API code';
+                    status = 'warning';
+                }
+                
+                if (hasOldError) {
+                    message += ' ❌ Still has old error handling';
+                    status = 'error';
+                }
+                
+                addResult('frontendResult', 'Frontend Test', status, message, {
+                    hasFixedAPI,
+                    hasOldError,
+                    contentLength: content.length
+                });
+                
+            } catch (error) {
+                addResult('frontendResult', 'Frontend Test', 'error', `Frontend check failed: ${error.message}`);
+            }
+        }
+
+        async function runAllTests() {
+            clearAll();
+            await testAuth();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            await testChatDirect();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            await testFrontendURL();
+            
+            // Analysis
+            setTimeout(() => {
+                const authResult = document.getElementById('authResult');
+                const chatResult = document.getElementById('chatResult');
+                const frontendResult = document.getElementById('frontendResult');
+                
+                const hasAuthSuccess = authResult.querySelector('.success') !== null;
+                const hasChatSuccess = chatResult.querySelector('.success') !== null;
+                const hasFrontendFixed = frontendResult.querySelector('.success') !== null;
+                
+                let analysis = '';
+                if (hasAuthSuccess && hasChatSuccess && hasFrontendFixed) {
+                    analysis = '🎉 ALL TESTS PASSED! The frontend should be working correctly.';
+                } else if (hasAuthSuccess && hasChatSuccess && !hasFrontendFixed) {
+                    analysis = '⚠️ Backend works but frontend may need cache clear or redeployment.';
+                } else {
+                    analysis = '❌ Issues detected - check individual test results above.';
+                }
+                
+                addResult('compareResult', 'Analysis', 'success', analysis);
+            }, 2000);
+        }
+
+        function clearAll() {
+            document.getElementById('authResult').innerHTML = '';
+            document.getElementById('chatResult').innerHTML = '';
+            document.getElementById('frontendResult').innerHTML = '';
+            document.getElementById('compareResult').innerHTML = '';
+        }
+    </script>
+</body>
+</html>

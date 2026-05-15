@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     PINECONE_API_KEY: str
     PINECONE_ENVIRONMENT: str
     PINECONE_INDEX_NAME: str = "multimodal-ai"
+    YOUTUBE_API_KEY: Optional[str] = None
     
     # CORS
     FRONTEND_URL: str = "http://localhost:3000"

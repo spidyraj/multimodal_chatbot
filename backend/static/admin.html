@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backend Admin Dashboard</title>
+    <style>
+        /* BLACK THEME STYLES */
+        :root {
+            --bg-primary: #000000;
+            --bg-secondary: #111111;
+            --bg-tertiary: #1a1a1a;
+            --bg-card: #0a0a0a;
+            --bg-input: #0f0f0f;
+            --border-color: #2a2a2a;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --text-muted: #6b7280;
+            --accent-color: #3b82f6;
+            --accent-hover: #2563eb;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --warning-color: #f59e0b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .status.online {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .status.offline {
+            background-color: var(--error-color);
+            color: white;
+        }
+
+        .status.pending {
+            background-color: var(--warning-color);
+            color: white;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: var(--text-primary);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--bg-tertiary);
+            border-color: var(--text-muted);
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .input-group input,
+        .input-group textarea {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 0.375rem;
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+        }
+
+        .input-group input:focus,
+        .input-group textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .logs {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .logs h3 {
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .log-entry {
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.25rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+        }
+
+        .log-entry.info {
+            background-color: var(--bg-secondary);
+            color: var(--text-secondary);
+        }
+
+        .log-entry.success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .log-entry.error {
+            background-color: var(--error-color);
+            color: white;
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .metric .value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-color);
+        }
+
+        .metric .label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🚀 Backend Admin Dashboard</h1>
+            <p>Multimodal AI System - Black Theme</p>
+        </header>
+
+        <!-- System Metrics -->
+        <div class="metrics">
+            <div class="metric">
+                <div class="value" id="api-status">🟢</div>
+                <div class="label">API Status</div>
+            </div>
+            <div class="metric">
+                <div class="value" id="total-users">0</div>
+                <div class="label">Total Users</div>
+            </div>
+            <div class="metric">
+                <div class="value" id="total-chats">0</div>
+                <div class="label">Total Chats</div>
+            </div>
+            <div class="metric">
+                <div class="value" id="youtube-videos">0</div>
+                <div class="label">YouTube Videos</div>
+            </div>
+        </div>
+
+        <!-- Service Status Grid -->
+        <div class="grid">
+            <div class="card">
+                <h3>🗄️ Database</h3>
+                <p>PostgreSQL connection and performance</p>
+                <span class="status online" id="db-status">Online</span>
+            </div>
+            <div class="card">
+                <h3>🤖 LLM Service</h3>
+                <p>Groq API integration and response times</p>
+                <span class="status online" id="llm-status">Online</span>
+            </div>
+            <div class="card">
+                <h3>🌐 Vector Database</h3>
+                <p>Pinecone vector storage and retrieval</p>
+                <span class="status online" id="vector-status">Online</span>
+            </div>
+            <div class="card">
+                <h3>🎬 YouTube Service</h3>
+                <p>Video processing and transcript retrieval</p>
+                <span class="status online" id="youtube-status">Online</span>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card">
+            <h3>⚡ Quick Actions</h3>
+            <div class="grid">
+                <button class="btn btn-primary" onclick="testHealth()">Test Health</button>
+                <button class="btn btn-primary" onclick="testAuth()">Test Auth</button>
+                <button class="btn btn-primary" onclick="testChat()">Test Chat</button>
+                <button class="btn btn-primary" onclick="testYouTube()">Test YouTube</button>
+            </div>
+        </div>
+
+        <!-- API Testing -->
+        <div class="card">
+            <h3>🧪 API Testing</h3>
+            <div class="input-group">
+                <label for="api-endpoint">API Endpoint</label>
+                <input type="text" id="api-endpoint" value="/health" placeholder="Enter endpoint">
+            </div>
+            <div class="input-group">
+                <label for="api-method">Method</label>
+                <select id="api-method" style="width: 100%; padding: 0.5rem; background-color: var(--bg-input); border: 1px solid var(--border-color); border-radius: 0.375rem; color: var(--text-primary);">
+                    <option value="GET">GET</option>
+                    <option value="POST">POST</option>
+                    <option value="PUT">PUT</option>
+                    <option value="DELETE">DELETE</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label for="api-body">Request Body (JSON)</label>
+                <textarea id="api-body" rows="4" placeholder='{"key": "value"}'></textarea>
+            </div>
+            <button class="btn btn-primary" onclick="testAPI()">Test API</button>
+            <div id="api-response" style="margin-top: 1rem; padding: 1rem; background-color: var(--bg-secondary); border-radius: 0.375rem; font-family: monospace; white-space: pre-wrap;"></div>
+        </div>
+
+        <!-- System Logs -->
+        <div class="logs">
+            <h3>📋 System Logs</h3>
+            <div id="log-container">
+                <div class="log-entry info">System initialized with black theme</div>
+                <div class="log-entry success">Backend services loaded successfully</div>
+                <div class="log-entry info">Waiting for user interactions...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://multimodal-backend-production.up.railway.app';
+        
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            updateMetrics();
+            checkServiceStatus();
+            setInterval(updateMetrics, 30000); // Update every 30 seconds
+        });
+
+        function addLog(message, type = 'info') {
+            const logContainer = document.getElementById('log-container');
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type}`;
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        async function updateMetrics() {
+            try {
+                // Update API status
+                const healthResponse = await fetch(`${API_BASE}/health`);
+                const status = healthResponse.ok ? '🟢' : '🔴';
+                document.getElementById('api-status').textContent = status;
+                
+                if (healthResponse.ok) {
+                    const health = await healthResponse.json();
+                    addLog(`Health check: ${health.status}`, 'success');
+                }
+            } catch (error) {
+                document.getElementById('api-status').textContent = '🔴';
+                addLog(`Health check failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function checkServiceStatus() {
+            const services = [
+                { id: 'db-status', endpoint: '/health', field: 'database' },
+                { id: 'llm-status', endpoint: '/health', field: 'llm' },
+                { id: 'vector-status', endpoint: '/health', field: 'vector_db' },
+                { id: 'youtube-status', endpoint: '/health', field: 'youtube' }
+            ];
+
+            for (const service of services) {
+                try {
+                    const response = await fetch(`${API_BASE}${service.endpoint}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        const status = data[service.field] ? 'online' : 'offline';
+                        document.getElementById(service.id).className = `status ${status}`;
+                        addLog(`${service.field}: ${status}`, status === 'online' ? 'success' : 'error');
+                    }
+                } catch (error) {
+                    document.getElementById(service.id).className = 'status offline';
+                    addLog(`${service.field}: Connection failed`, 'error');
+                }
+            }
+        }
+
+        async function testHealth() {
+            addLog('Testing health endpoint...', 'info');
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                addLog(`Health check: ${JSON.stringify(data)}`, 'success');
+            } catch (error) {
+                addLog(`Health check failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAuth() {
+            addLog('Testing authentication...', 'info');
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'test2102226581@example.com',
+                        password: 'testpassword123'
+                    })
+                });
+                const data = await response.json();
+                addLog(`Auth test: ${response.status} - ${JSON.stringify(data)}`, response.ok ? 'success' : 'error');
+            } catch (error) {
+                addLog(`Auth test failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testChat() {
+            addLog('Testing chat endpoint...', 'info');
+            try {
+                // First login to get token
+                const loginResponse = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'test2102226581@example.com',
+                        password: 'testpassword123'
+                    })
+                });
+                
+                if (loginResponse.ok) {
+                    const { access_token } = await loginResponse.json();
+                    
+                    const chatResponse = await fetch(`${API_BASE}/chat`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${access_token}`
+                        },
+                        body: JSON.stringify({ message: 'Hello, test message' })
+                    });
+                    
+                    const data = await chatResponse.json();
+                    addLog(`Chat test: ${chatResponse.status} - ${JSON.stringify(data)}`, chatResponse.ok ? 'success' : 'error');
+                } else {
+                    addLog('Chat test: Failed to authenticate', 'error');
+                }
+            } catch (error) {
+                addLog(`Chat test failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testYouTube() {
+            addLog('Testing YouTube endpoint...', 'info');
+            try {
+                const response = await fetch(`${API_BASE}/youtube/demo-rag`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+                const data = await response.json();
+                addLog(`YouTube test: ${response.status} - ${JSON.stringify(data)}`, response.ok ? 'success' : 'error');
+            } catch (error) {
+                addLog(`YouTube test failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAPI() {
+            const endpoint = document.getElementById('api-endpoint').value;
+            const method = document.getElementById('api-method').value;
+            const body = document.getElementById('api-body').value;
+            
+            addLog(`Testing ${method} ${endpoint}...`, 'info');
+            
+            try {
+                const options = {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' }
+                };
+                
+                if (method !== 'GET' && body) {
+                    options.body = body;
+                }
+                
+                const response = await fetch(`${API_BASE}${endpoint}`, options);
+                const data = await response.json();
+                
+                const responseDiv = document.getElementById('api-response');
+                responseDiv.textContent = `Status: ${response.status}\n\nResponse:\n${JSON.stringify(data, null, 2)}`;
+                
+                addLog(`API test: ${response.status} - ${endpoint}`, response.ok ? 'success' : 'error');
+            } catch (error) {
+                const responseDiv = document.getElementById('api-response');
+                responseDiv.textContent = `Error: ${error.message}`;
+                addLog(`API test failed: ${error.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

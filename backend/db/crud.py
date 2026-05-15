@@ -6,9 +6,9 @@ from typing import Optional, List
 def get_user_by_email(db: Session, email: str) -> Optional[User]:
     return db.query(User).filter(User.email == email).first()
 
-def create_user(db: Session, email: str, password: str) -> User:
+def create_user(db: Session, username: str, email: str, password: str) -> User:
     hashed_password = get_password_hash(password)
-    db_user = User(email=email, hashed_password=hashed_password)
+    db_user = User(username=username, email=email, hashed_password=hashed_password)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)

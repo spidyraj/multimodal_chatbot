@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontend Debug Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        button { padding: 10px 20px; margin: 5px; }
+        pre { background: #f8f9fa; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Frontend Debug Test</h1>
+    <div id="results"></div>
+
+    <button onclick="testHealth()">Test Health</button>
+    <button onclick="testRegister()">Test Register</button>
+    <button onclick="testLogin()">Test Login</button>
+    <button onclick="testAuthMe()">Test Auth Me</button>
+    <button onclick="testChat()">Test Chat</button>
+    <button onclick="clearResults()">Clear Results</button>
+
+    <script>
+        const API_URL = 'https://multimodal-backend-production.up.railway.app';
+        let authToken = null;
+
+        function addResult(test, status, message, data = null) {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `test ${status}`;
+            
+            let content = `<h3>${test}</h3><p><strong>Status:</strong> ${status.toUpperCase()}</p><p>${message}</p>`;
+            if (data) {
+                content += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            }
+            
+            div.innerHTML = content;
+            results.appendChild(div);
+        }
+
+        async function testHealth() {
+            try {
+                const response = await fetch(`${API_URL}/health`);
+                const data = await response.json();
+                addResult('Health Check', 'success', 'Backend is healthy', data);
+            } catch (error) {
+                addResult('Health Check', 'error', `Failed: ${error.message}`);
+            }
+        }
+
+        async function testRegister() {
+            try {
+                const random = Math.floor(Math.random() * 1000000);
+                const response = await fetch(`${API_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: `testuser${random}`,
+                        email: `test${random}@example.com`,
+                        password: 'testpassword123'
+                    })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    addResult('Register', 'success', 'User registered successfully', data);
+                } else {
+                    addResult('Register', 'error', `Registration failed: ${data.detail || 'Unknown error'}`, data);
+                }
+            } catch (error) {
+                addResult('Register', 'error', `Failed: ${error.message}`);
+            }
+        }
+
+        async function testLogin() {
+            try {
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: 'test2102226581@example.com',
+                        password: 'testpassword123'
+                    })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    authToken = data.access_token;
+                    addResult('Login', 'success', 'Login successful', data);
+                } else {
+                    addResult('Login', 'error', `Login failed: ${data.detail || 'Unknown error'}`, data);
+                }
+            } catch (error) {
+                addResult('Login', 'error', `Failed: ${error.message}`);
+            }
+        }
+
+        async function testAuthMe() {
+            if (!authToken) {
+                addResult('Auth Me', 'error', 'Please login first to get auth token');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/auth/me`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json',
+                    }
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    addResult('Auth Me', 'success', 'User info retrieved', data);
+                } else {
+                    addResult('Auth Me', 'error', `Auth failed: ${data.detail || 'Unknown error'}`, data);
+                }
+            } catch (error) {
+                addResult('Auth Me', 'error', `Failed: ${error.message}`);
+            }
+        }
+
+        async function testChat() {
+            if (!authToken) {
+                addResult('Chat', 'error', 'Please login first to get auth token');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/chat/`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: 'Hello, how are you?'
+                    })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    addResult('Chat', 'success', 'Chat message sent', data);
+                } else {
+                    addResult('Chat', 'error', `Chat failed: ${data.detail || 'Unknown error'}`, data);
+                }
+            } catch (error) {
+                addResult('Chat', 'error', `Failed: ${error.message}`);
+            }
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        // Test localStorage
+        function testLocalStorage() {
+            try {
+                localStorage.setItem('test', 'value');
+                const value = localStorage.getItem('test');
+                localStorage.removeItem('test');
+                addResult('LocalStorage', 'success', 'LocalStorage is working', { testValue: value });
+            } catch (error) {
+                addResult('LocalStorage', 'error', `LocalStorage failed: ${error.message}`);
+            }
+        }
+
+        // Run localStorage test on page load
+        window.onload = function() {
+            testLocalStorage();
+            testHealth();
+        };
+    </script>
+</body>
+</html>

@@ -3,7 +3,7 @@ from services.embedding_service import embed_single_text
 from services.pinecone_service import query_embeddings
 from core.logger import logger
 
-def retrieve_context(query: str, user_id: Optional[int] = None, top_k: int = 3) -> str:
+def retrieve_context(query: str, user_id: Optional[int] = None, top_k: int = 3, document_id: Optional[str] = None) -> str:
     """
     Retrieve relevant context for a query using RAG
     """
@@ -14,10 +14,16 @@ def retrieve_context(query: str, user_id: Optional[int] = None, top_k: int = 3) 
             logger.warning("Failed to generate query embedding")
             return ""
         
-        # Build filter for user-specific documents
+        # Build filter for user-specific documents and document-specific filtering
         filter_dict = None
         if user_id is not None:
             filter_dict = {"user_id": user_id}
+        
+        # Add document_id filter if specified (prevents data leakage)
+        if document_id is not None:
+            if filter_dict is None:
+                filter_dict = {}
+            filter_dict["document_id"] = document_id
         
         # Query Pinecone for relevant documents
         results = query_embeddings(query_embedding, top_k=top_k, filter_dict=filter_dict)

@@ -1,10 +1,11 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 from core.database import engine, Base
 from core.config import settings
 from core.logger import logger
-from api.routes import auth, chat, upload, youtube, health
+from api.routes import auth, chat, upload, youtube, health, debug
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -23,7 +24,7 @@ async def lifespan(app: FastAPI):
 # Create FastAPI app
 app = FastAPI(
     title="Multimodal AI API",
-    description="Production-ready multimodal AI system with RAG, YouTube, and chat capabilities",
+    description="Production-ready multimodal AI system with RAG, YouTube, chat, and file upload capabilities",
     version="1.0.0",
     lifespan=lifespan
 )
@@ -43,6 +44,10 @@ app.include_router(chat.router)
 app.include_router(upload.router)
 app.include_router(youtube.router)
 app.include_router(health.router)
+app.include_router(debug.router)
+
+# Static files for admin dashboard
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Root endpoint
 @app.get("/")
@@ -51,7 +56,9 @@ async def root():
         "message": "Multimodal AI API",
         "version": "1.0.0",
         "docs": "/docs",
-        "health": "/health"
+        "health": "/health",
+        "admin": "/static/admin.html",
+        "features": ["chat", "upload", "youtube"]
     }
 
 # Global exception handler

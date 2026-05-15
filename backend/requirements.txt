@@ -4,12 +4,21 @@ sqlalchemy==2.0.23
 psycopg2-binary==2.9.9
 python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
+bcrypt==4.0.1
 python-multipart==0.0.6
 pydantic==2.5.0
 pydantic-settings==2.1.0
+pydantic[email]==2.5.0
 requests==2.31.0
-sentence-transformers==2.2.2
+# sentence-transformers==2.2.2  # Commented out for Railway - using lightweight embeddings
 pinecone-client==3.0.0
 youtube-transcript-api==0.6.1
 python-dotenv==1.0.0
 PyPDF2==3.0.1
+Pillow==10.0.0
+pytesseract==0.3.10
+email-validator==2.1.0
+numpy==1.24.3
+# Optional: Uncomment below if you want full embeddings (requires more resources)
+# sentence-transformers==2.2.2
+# torch>=1.6.0

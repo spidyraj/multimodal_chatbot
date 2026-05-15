@@ -1,98 +1,131 @@
-# Multimodal AI System
+# 🤖 MultiModal AI Chatbot - Multilingual & RAG-Powered
 
-A production-ready multimodal AI system with RAG (Retrieval-Augmented Generation), YouTube summarization, and chat capabilities.
+A high-performance, production-ready Multimodal AI system that combines Retrieval-Augmented Generation (RAG), Optical Character Recognition (OCR), and Text-to-Speech (TTS) capabilities. This chatbot can process documents, images, and text while providing a seamless multilingual experience.
 
-## Features
+🚀 **Live Demo:** [https://multimodal-chatbot-multiluinguial.vercel.app/](https://multimodal-chatbot-multiluinguial.vercel.app/)
 
-- 🔐 **Authentication**: JWT-based user authentication with registration and login
-- 💬 **AI Chat**: Conversational AI with context from uploaded documents
-- 📄 **Document Upload**: PDF processing with vector storage for RAG
-- 🎥 **YouTube Summarization**: AI-powered video transcript summarization
-- 🗄️ **Persistent Storage**: PostgreSQL for users, chat history, and usage tracking
-- 🔍 **Vector Search**: Pinecone integration for semantic document retrieval
-- 🚀 **Production Ready**: Dockerized deployment with Railway support
+---
 
-## Architecture
+## ✨ Features
 
-### Backend (FastAPI)
-- **Framework**: FastAPI with async support
-- **Database**: PostgreSQL with SQLAlchemy ORM
-- **Vector DB**: Pinecone for document embeddings
-- **LLM**: Groq API (Llama3-8b-8192)
-- **Authentication**: JWT tokens with bcrypt password hashing
-- **Embeddings**: SentenceTransformer (all-MiniLM-L6-v2)
+- 🔐 **Secure Authentication**: JWT-based user system with robust registration and login flows.
+- 💬 **Intelligent Chat**: Conversational AI powered by Groq's high-speed LLMs.
+- 📄 **Advanced Document RAG**: Upload PDFs and documents to create a private knowledge base.
+- 🖼️ **Image Recognition (OCR)**: Extract and query information from images using Tesseract OCR.
+- 🔊 **Voice Synthesis (TTS)**: Convert AI responses into natural-sounding speech in 10+ languages.
+- 🌍 **Multilingual Support**: Communicate and generate audio in English, Hindi, Spanish, French, and more.
+- 🔍 **Semantic Search**: Powered by Pinecone vector database for highly relevant context retrieval.
+- 🚫 **No YouTube Summarization**: Focuses purely on document, image, and text-based multimodal interactions.
 
-### Frontend (React)
-- **Framework**: React 18 with Vite
-- **Routing**: React Router v6
-- **Styling**: Tailwind CSS
-- **Icons**: Heroicons
-- **HTTP Client**: Axios with interceptors
+---
 
-## Quick Start
+## 🛠️ Tech Stack
+
+### Frontend
+- **Framework**: [React 18](https://reactjs.org/) with **Vite** for blazing fast development.
+- **Styling**: **Tailwind CSS** for a modern, responsive UI.
+- **Animations**: **Framer Motion** for smooth, premium transitions.
+- **Icons**: **Heroicons** for clean, consistent iconography.
+- **State Management**: React Hooks and Context API.
+- **API Client**: **Axios** with centralized interceptors for auth management.
+
+### Backend
+- **Framework**: [FastAPI](https://fastapi.tiangolo.com/) (Python) for high-performance asynchronous API handling.
+- **Database**: **PostgreSQL** with **SQLAlchemy ORM** for persistent data (Users, Chats).
+- **Vector Store**: **Pinecone** for efficient semantic similarity search.
+- **LLM Engine**: **Groq API** (utilizing Llama 3.1 & Gemma 2 models) for near-instant responses.
+- **OCR Engine**: **Tesseract OCR** for processing text within images.
+- **TTS Engine**: **gTTS (Google Text-to-Speech)** for multilingual audio generation.
+- **Document Processing**: **PyPDF2** and **Pillow**.
+
+---
+
+## 🏗️ System Architecture
+
+### 📄 Document & Image Processing (RAG)
+The system uses a sophisticated RAG pipeline to allow the LLM to "read" your uploaded files.
+
+```mermaid
+graph TD
+    subgraph "Ingestion Phase"
+    A[User Uploads File] --> B{File Type?}
+    B -- PDF --> C[PyPDF2 Extraction]
+    B -- Image/OCR --> D[Tesseract OCR]
+    B -- Text/MD --> E[Direct Read]
+    C --> F[Text Chunking]
+    D --> F
+    E --> F
+    F --> G[Embedding Service]
+    G --> H[(Pinecone Vector DB)]
+    end
+
+    subgraph "Query Phase"
+    I[User Message] --> J[Generate Query Embedding]
+    J --> K[Vector Similarity Search]
+    K --> L[Retrieve Top-K Context]
+    L --> M[Augment Prompt with Context]
+    M --> N[Groq LLM Execution]
+    N --> O[Final AI Response]
+    end
+```
+
+### 🔊 Audio Architecture (TTS)
+Seamlessly convert text responses into high-quality audio streams.
+
+```mermaid
+graph TD
+    A[AI Response Text] --> B[Audio Service]
+    B --> C{Language Detection}
+    C --> D[gTTS Engine]
+    D --> E[MP3 Byte Stream Generation]
+    E --> F[FastAPI StreamingResponse]
+    F --> G[Frontend Audio Component]
+    G --> H[User Playback]
+```
+
+---
+
+## 🚀 Getting Started
 
 ### Prerequisites
 - Node.js 18+
 - Python 3.10+
-- PostgreSQL database
-- Pinecone account
-- Groq API key
+- Tesseract OCR installed on your system
+- PostgreSQL Database
+- API Keys: Groq, Pinecone
 
-### Backend Setup
+### Quick Setup
 
-1. **Navigate to backend directory**
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/multimodal-chatbot.git
+   cd multimodal-chatbot
+   ```
+
+2. **Backend Setup**
    ```bash
    cd backend
-   ```
-
-2. **Create virtual environment**
-   ```bash
    python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
-
-3. **Install dependencies**
-   ```bash
+   source venv/bin/activate # Windows: venv\Scripts\activate
    pip install -r requirements.txt
+   cp .env.example .env # Add your API keys
+   uvicorn main:app --reload
    ```
 
-4. **Set environment variables**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your actual values
-   ```
-
-5. **Run the server**
-   ```bash
-   uvicorn main:app --reload --host 0.0.0.0 --port 8000
-   ```
-
-### Frontend Setup
-
-1. **Navigate to frontend directory**
+3. **Frontend Setup**
    ```bash
    cd frontend
-   ```
-
-2. **Install dependencies**
-   ```bash
    npm install
-   ```
-
-3. **Set environment variables**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your backend URL
-   ```
-
-4. **Run the development server**
-   ```bash
+   cp .env.example .env # Update VITE_API_URL
    npm run dev
    ```
 
-## Environment Variables
+---
+
+## ⚙️ Environment Configuration
 
 ### Backend (.env)
+Required keys for the backend to function:
 ```env
 DATABASE_URL=postgresql://user:password@host:port/dbname
 SECRET_KEY=your-secret-key-here
@@ -100,7 +133,7 @@ GROQ_API_KEY=your-groq-api-key
 PINECONE_API_KEY=your-pinecone-api-key
 PINECONE_ENVIRONMENT=your-pinecone-environment
 PINECONE_INDEX_NAME=multimodal-ai
-FRONTEND_URL=http://localhost:3000
+FRONTEND_URL=http://localhost:5173
 ```
 
 ### Frontend (.env)
@@ -108,105 +141,37 @@ FRONTEND_URL=http://localhost:3000
 VITE_API_URL=http://localhost:8000
 ```
 
-## Railway Deployment
+---
 
-### Backend Deployment
+## 🧠 AI Models Used
+- **Llama 3.1 (Groq)**: Primary model for complex reasoning and context-aware chatting.
+- **Gemma 2 (Groq)**: Lightweight model for fast, simple interactions.
+- **Tesseract OCR**: Specialized engine for visual text extraction from images.
+- **Google TTS**: High-fidelity speech synthesis engine.
 
-1. **Create new Railway project**
-2. **Connect GitHub repository**
-3. **Set environment variables in Railway dashboard**
-4. **Add PostgreSQL database**
-5. **Deploy**
+---
 
-### Frontend Deployment
+## 📡 API Reference
 
-1. **Create new Railway project for frontend**
-2. **Connect same repository**
-3. **Set root directory to `frontend`**
-4. **Set build command: `npm run build`**
-5. **Set start command: `npm run preview`**
-6. **Set environment variables**
-7. **Deploy**
+| Endpoint | Method | Description |
+| :--- | :--- | :--- |
+| `/auth/register` | `POST` | Create a new user account |
+| `/auth/login` | `POST` | Authenticate and receive JWT |
+| `/chat/` | `POST` | Send a message (with RAG context) |
+| `/chat/with-file` | `POST` | Chat while uploading a temporary file |
+| `/upload/` | `POST` | Upload document to permanent vector store |
+| `/audio/generate` | `POST` | Convert text to speech |
+| `/health` | `GET` | System status check |
 
-## API Endpoints
+---
 
-### Authentication
-- `POST /auth/register` - Register new user
-- `POST /auth/login` - User login
-- `GET /auth/me` - Get current user info
+## 🛡️ Security & Performance
+- **JWT Protection**: All chat and upload endpoints are protected by secure token-based auth.
+- **Environment Isolation**: Secrets are managed via `.env` files and never committed.
+- **Asynchronous Processing**: Fast responses even during heavy I/O operations.
+- **Connection Pooling**: Optimized database connections for high concurrency.
 
-### Chat
-- `POST /chat/` - Send message to AI
-- `GET /chat/history` - Get chat history
+---
 
-### Upload
-- `POST /upload/pdf` - Upload PDF document
-- `DELETE /upload/{document_id}` - Delete document
-
-### YouTube
-- `POST /youtube/summarize` - Summarize YouTube video
-
-### Health
-- `GET /health` - Health check endpoint
-
-## Usage
-
-1. **Register an account** or login with existing credentials
-2. **Upload PDF documents** to enhance chat with context
-3. **Chat with AI** using your uploaded documents as knowledge base
-4. **Summarize YouTube videos** by pasting video URLs
-5. **View chat history** and manage your documents
-
-## Development
-
-### Adding New Features
-
-1. **Backend**: Add new routes in `api/routes/`
-2. **Services**: Implement business logic in `services/`
-3. **Frontend**: Create components in `src/components/`
-4. **Pages**: Add new pages in `src/pages/`
-
-### Database Migrations
-
-For production deployments, consider adding Alembic for database migrations:
-
-```bash
-pip install alembic
-alembic init alembic
-alembic revision --autogenerate -m "Initial migration"
-alembic upgrade head
-```
-
-## Security Considerations
-
-- JWT tokens expire after 24 hours
-- Passwords are hashed with bcrypt
-- CORS is configured for specific origins
-- Input validation with Pydantic schemas
-- SQL injection prevention with SQLAlchemy ORM
-
-## Performance Optimizations
-
-- Connection pooling for database
-- Lightweight embedding model for Railway compatibility
-- Async FastAPI endpoints
-- Request/response caching (can be added)
-
-## Monitoring
-
-- Health check endpoint for monitoring
-- Structured logging with timestamps
-- Error tracking and reporting
-- Usage metrics tracking
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
-
-## License
-
-This project is licensed under the MIT License.
+## 📄 License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

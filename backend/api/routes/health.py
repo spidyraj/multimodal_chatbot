@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 from core.database import get_db
 from core.logger import logger
 from services.embedding_service import get_model_info
@@ -13,7 +14,7 @@ async def health_check(db: Session = Depends(get_db)):
     """
     try:
         # Test database connection
-        db.execute("SELECT 1")
+        db.execute(text("SELECT 1"))
         
         # Get embedding model info
         model_info = get_model_info()

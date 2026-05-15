@@ -17,26 +17,56 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const initAuth = async () => {
-      const token = localStorage.getItem('token')
-      if (token) {
+      try {
+        // Safely access localStorage
+        let token = null;
         try {
-          const response = await authAPI.getMe()
-          setUser(response.data)
+          token = localStorage.getItem('token');
         } catch (error) {
-          localStorage.removeItem('token')
+          console.warn('localStorage access failed:', error);
         }
+        
+        if (token) {
+          try {
+            const response = await authAPI.getMe()
+            setUser(response.data)
+          } catch (error) {
+            console.error('Auth initialization error:', error)
+            try {
+              localStorage.removeItem('token')
+            } catch (e) {
+              console.warn('localStorage removal failed:', e);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Token retrieval error:', error)
+      } finally {
+        setLoading(false)
       }
-      setLoading(false)
     }
 
+    // Add timeout to prevent infinite loading
+    const timeoutId = setTimeout(() => {
+      setLoading(false)
+    }, 5000) // 5 second timeout
+
     initAuth()
+    
+    return () => clearTimeout(timeoutId)
   }, [])
 
   const login = async (email, password) => {
     try {
       const response = await authAPI.login({ email, password })
       const { access_token } = response.data
-      localStorage.setItem('token', access_token)
+      
+      // Safely store token
+      try {
+        localStorage.setItem('token', access_token)
+      } catch (error) {
+        console.warn('localStorage storage failed:', error);
+      }
       
       // Get user info
       const userResponse = await authAPI.getMe()
@@ -51,9 +81,9 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
-  const register = async (email, password) => {
+  const register = async (username, email, password) => {
     try {
-      await authAPI.register({ email, password })
+      await authAPI.register({ username, email, password })
       
       // Auto login after registration
       const loginResult = await login(email, password)
@@ -67,7 +97,11 @@ export const AuthProvider = ({ children }) => {
   }
 
   const logout = () => {
-    localStorage.removeItem('token')
+    try {
+      localStorage.removeItem('token')
+    } catch (error) {
+      console.warn('localStorage removal failed:', error);
+    }
     setUser(null)
   }
 

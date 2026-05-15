@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Direct Chat Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        button { padding: 10px 20px; margin: 5px; }
+        pre { background: #f8f9fa; padding: 10px; overflow-x: auto; }
+        input { width: 300px; padding: 5px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Direct Chat Test (Like Frontend)</h1>
+    <div id="results"></div>
+    
+    <div>
+        <input type="text" id="messageInput" placeholder="Type your message here..." />
+        <button onclick="testChat()">Send Message</button>
+        <button onclick="clearResults()">Clear</button>
+    </div>
+
+    <script>
+        const API_URL = 'https://multimodal-backend-production.up.railway.app';
+        let authToken = null;
+
+        function addResult(test, status, message, data = null) {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `test ${status}`;
+            
+            let content = `<h3>${test}</h3><p><strong>Status:</strong> ${status.toUpperCase()}</p><p>${message}</p>`;
+            if (data) {
+                content += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            }
+            
+            div.innerHTML = content;
+            results.appendChild(div);
+        }
+
+        async function login() {
+            try {
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: 'test2102226581@example.com',
+                        password: 'testpassword123'
+                    })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    authToken = data.access_token;
+                    addResult('Login', 'success', 'Token received', { token: data.access_token.substring(0, 20) + '...' });
+                } else {
+                    addResult('Login', 'error', `Login failed: ${data.detail || 'Unknown error'}`, data);
+                }
+            } catch (error) {
+                addResult('Login', 'error', `Failed: ${error.message}`);
+            }
+        }
+
+        async function testChat() {
+            if (!authToken) {
+                addResult('Chat', 'error', 'Please login first');
+                return;
+            }
+
+            const message = document.getElementById('messageInput').value;
+            if (!message) {
+                addResult('Chat', 'error', 'Please enter a message');
+                return;
+            }
+
+            try {
+                // This is EXACTLY like the frontend does it
+                const response = await fetch(`${API_URL}/chat/`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message
+                    })
+                });
+                
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    addResult('Chat', 'success', `Message sent: "${message}"`, data);
+                    document.getElementById('messageInput').value = '';
+                } else {
+                    addResult('Chat', 'error', `Chat failed: ${data.detail || 'Unknown error'}`, data);
+                }
+            } catch (error) {
+                console.error('Chat error:', error);
+                addResult('Chat', 'error', `Failed: ${error.message}`);
+            }
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        // Auto login on page load
+        window.onload = function() {
+            login();
+        };
+    </script>
+</body>
+</html>
